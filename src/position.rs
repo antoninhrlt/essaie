@@ -22,11 +22,19 @@ impl Position {
         }
     }
 
-    pub fn from_i32(i: i32) -> Self {
-        Self {
-            x: char::from_u32((i - (i / 8)).try_into().unwrap()).unwrap(),
-            y: (i / 8) as i8
+    pub fn from_i32(i: i32) -> Option<Self> {
+        let x_as_i32: i32 = i - 8 * (i / 8) + 97;
+
+        if x_as_i32 < 0 {
+            return None;
         }
+
+        Some(
+            Self {
+                x: char::from_u32(x_as_i32 as u32).unwrap(),
+                y: i as i8 / 8 + 1
+            }
+        )
     }
 
     pub fn set_x(&mut self, x: char) -> &mut Self {
@@ -50,6 +58,14 @@ impl Position {
 
 #[test]
 fn position_from_i32() {
-    let i: i32 = 17; // so it's (7, b)
+    //   a b c d e f g h
+    // 1 x x x x x x x x => 8    
+    // 2 x x x x x x x x => 16
+    // 3 x x => 18
+    //
+    let i: i32 = 18; // so it's {'c', 3}
+    
+    println!("'a' = {}", 'a' as i32);
+    println!("y : {}", i / 8 + 1);
     println!("{:?}", Position::from_i32(i));
 }
