@@ -14,50 +14,82 @@ use crate::{piece::Piece, position::Position, team::Team};
 /// graphically revert it
 pub struct Board {
     squares: [Piece; 64],
+    captured_pieces: Vec<Piece>,
 }
 
 impl Board {
+    /// Initializes a new chessboard with the pieces are their initial pieces
     pub fn new() -> Self {
         let mut chessboard = Self {
             squares: [Piece::None; 64],
+            captured_pieces: vec![],
         };
 
         chessboard.reset();
         chessboard
     }
 
-    /// Reset the board with the initial positions for every piece.
+    /// Fills the chessboard with `Piece::None` then resets the board with the 
+    /// initial positions for every piece.
     pub fn reset(&mut self) {
-        let blacks = vec![
-            Piece::King(Team::Black),
-            Piece::Queen(Team::Black),
-            Piece::Rook(Team::Black),
-            Piece::Bishop(Team::Black),
-            Piece::Knight(Team::Black),
-            Piece::Pawn(Team::Black),
+        self.squares = [Piece::None; 64];
+
+        self.reset_team(Team::White);
+        self.reset_team(Team::Black);
+    }
+
+    /// Reset positions for pieces from a certain team to their initial 
+    /// positions.
+    fn reset_team(&mut self, team: Team) {
+        let pieces = vec![
+            Piece::King(team),
+            Piece::Queen(team),
+            Piece::Rook(team),
+            Piece::Bishop(team),
+            Piece::Knight(team),
+            Piece::Pawn(team),
         ];
 
-        let whites = vec![
-            Piece::King(Team::White),
-            Piece::Queen(Team::White),
-            Piece::Rook(Team::White),
-            Piece::Bishop(Team::White),
-            Piece::Knight(Team::White),
-            Piece::Pawn(Team::White),
-        ];
-
-        for i in blacks.iter().zip(whites.iter()) {
-            let (black_piece, white_piece) = i;
-            for j in black_piece
-                .initial_positions()
-                .iter()
-                .zip(white_piece.initial_positions().iter())
-            {
-                let (black_initial_position, white_initial_position) = j;
-                self.squares[black_initial_position.to_index()] = *black_piece;
-                self.squares[white_initial_position.to_index()] = *white_piece;
+        for piece in pieces {
+            for position in piece.initial_positions() {
+                self.squares[position.to_index()] = piece;
             }
         }
+    }
+
+    /// Move the piece at `from_position` to the `to_position` position without
+    /// checking anything : it's not following the chess rules. Before moving
+    /// a piece, be sure it's a possible move.
+    ///
+    /// Replace the `from_position` by a `Piece::None` object.
+    ///
+    /// If there is a piece at `to_position`, it will be set as captured
+    ///
+    /// Returns an error when the `from_position` is a `Piece::None` piece
+    pub fn move_piece(&mut self, from_position: Position, to_position: Position) -> Result<(), &'static str> {
+        let piece = self.get_piece(from_position.clone());
+
+        if piece == Piece::None {
+            return Err("Try to move a `None` piece");
+        }
+        
+        // Captures the piece when not `None`
+        {
+            let to_piece = self.get_piece(to_position.clone());
+            if to_piece != Piece::None {
+                self.captured_pieces.push(to_piece);
+            }
+        }
+
+        self.squares[to_position.to_index()] = piece;
+        self.squares[from_position.to_index()] = Piece::None;
+
+        Ok(())
+    }
+
+    /// Finds the piece at `position` and returns it
+    pub fn get_piece(&self, position: Position) -> Piece {
+        self.squares[position.to_index()]
     }
 
     /// Positions start from 1, not 0 like an index. So the first position at
@@ -84,6 +116,10 @@ impl Board {
         }
 
         None
+    }
+
+    pub fn captured_pieces(&self) -> &Vec<Piece> {
+        &self.captured_pieces
     }
 
     // todo!() : Display the board on a GUI
@@ -129,4 +165,13 @@ fn board_positions() {
         chessboard.get_position(Piece::King(Team::Black)),
         Some(Position::new('e', 8))
     );
+}
+
+#[test]
+fn move_pieces() {
+    let mut chessboard = Board::new();
+    println!("1:\n{}", chessboard);
+
+    chessboard.move_piece(Position::new('b', 2), Position::new('b', 3));
+    println!("2:\n{}", chessboard);
 }
