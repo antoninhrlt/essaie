@@ -117,14 +117,14 @@ fn board_positions() {
     let chessboard = Board::new();
 
     println!("{}", chessboard);
+    
+    assert_eq!(
+        chessboard.get_position(Piece::Rook(Team::White)), 
+        Some(Position::new('a', 1))
+    );
 
     assert_eq!(
         chessboard.get_position(Piece::King(Team::Black)), 
         Some(Position::new('e', 8))
-    );
-
-    assert_eq!(
-        chessboard.get_position(Piece::Queen(Team::White)), 
-        Some(Position::new('d', 1))
     );
 }
