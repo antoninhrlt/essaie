@@ -42,7 +42,7 @@ impl Position {
     /// Destructure the position into a dumb index (used to walk through the
     /// board's squares)
     pub fn to_index(&self) -> usize {
-        ((self.y * 8 - 1) + (self.x as u32 - 97 + 1)).try_into().unwrap()
+        ((self.y - 1) * 8 + (self.x as u32 - 97)).try_into().unwrap()
     }
 
     pub fn set_x(&mut self, x: char) -> &mut Self {
@@ -80,7 +80,18 @@ fn position_from_i32() {
 }
 
 #[test]
-fn position_to_i32() {
+fn position_to_index() {
     let position = Position::new('c', 3);
+    
+    println!(
+        "{:?} = {} + {} (x was '{}' -> {} as u32)", 
+        position, 
+        position.x() as u32 - 97,
+        (position.y() - 1) * 8, 
+
+        position.x(),
+        position.x() as u32
+    );
+    
     assert_eq!(position.to_index(), 18);
 }
