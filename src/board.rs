@@ -32,8 +32,32 @@ impl Board {
 
     /// Reset the board with the initial positions for every piece.
     pub fn reset(&mut self) {
-        let pawn_position = Position::new('a', 2);
-        self.squares[pawn_position.to_index()] = Piece::Pawn(Team::White);
+        let blacks = vec![
+            Piece::King(Team::Black),
+            Piece::Queen(Team::Black),
+            Piece::Rook(Team::Black),
+            Piece::Bishop(Team::Black),
+            Piece::Knight(Team::Black),
+            Piece::Pawn(Team::Black),
+        ];
+
+        let whites = vec![
+            Piece::King(Team::White),
+            Piece::Queen(Team::White),
+            Piece::Rook(Team::White),
+            Piece::Bishop(Team::White),
+            Piece::Knight(Team::White),
+            Piece::Pawn(Team::White),
+        ];
+
+        for i in blacks.iter().zip(whites.iter()) {
+            let (black_piece, white_piece) = i;
+            for j in black_piece.initial_positions().iter().zip(white_piece.initial_positions().iter()) {
+                let (black_initial_position, white_initial_position) = j;
+                self.squares[black_initial_position.to_index()] = *black_piece;
+                self.squares[white_initial_position.to_index()] = *white_piece;
+            }
+        }
     }
 
     /// Positions start from 1, not 0 like an index. So the first position at
@@ -68,14 +92,17 @@ impl Board {
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (mut x, mut y) = (1, 1);
-        write!(f, "{}", y)?;
 
         for square in self.squares {
-            write!(f, " | {:?}\t", square)?;
+            write!(f, "\x1b[1;37m{:?}\x1b[0m \x1b[3m{}{}\x1b[0m | ", 
+                square, 
+                char::from_u32(x + 96).unwrap(), 
+                y
+            )?;
 
             if x == 8 && y != 8 {
                 y += 1;
-                write!(f, "\n{}", y)?;
+                write!(f, "\n")?;
                 x = 0;
             }
             x += 1;
