@@ -21,4 +21,4 @@ fn print_team() {
     let team = Team::Black;
     println!("{:?}", team);
     assert_eq!(team.to_string(), String::from("black"));
-} 
+}

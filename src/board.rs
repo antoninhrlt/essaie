@@ -4,20 +4,16 @@
 
 use std::fmt;
 
-use crate::{
-    piece::Piece,
-    position::Position,
-    team::Team,
-};
+use crate::{piece::Piece, position::Position, team::Team};
 
 /// The chessboard filled with piece
 ///
-/// Instead of reverting the position each time is needed, the chessboard is 
+/// Instead of reverting the position each time is needed, the chessboard is
 /// simply reverted. So, black pieces are at the bottom and white pieces are at
-/// the top. For printing it or displaying on a GUI, remember you have to 
+/// the top. For printing it or displaying on a GUI, remember you have to
 /// graphically revert it
 pub struct Board {
-    squares: [Piece; 64]
+    squares: [Piece; 64],
 }
 
 impl Board {
@@ -52,7 +48,11 @@ impl Board {
 
         for i in blacks.iter().zip(whites.iter()) {
             let (black_piece, white_piece) = i;
-            for j in black_piece.initial_positions().iter().zip(white_piece.initial_positions().iter()) {
+            for j in black_piece
+                .initial_positions()
+                .iter()
+                .zip(white_piece.initial_positions().iter())
+            {
                 let (black_initial_position, white_initial_position) = j;
                 self.squares[black_initial_position.to_index()] = *black_piece;
                 self.squares[white_initial_position.to_index()] = *white_piece;
@@ -65,17 +65,17 @@ impl Board {
     ///
     /// The first integer is `x`, the second one is `y`.
     ///
-    /// Returns a `None` value when the piece was not found. This can happen 
+    /// Returns a `None` value when the piece was not found. This can happen
     /// when a piece has been captured by the enemy.
     pub fn get_position(&self, piece_with_team: Piece) -> Option<Position> {
         // todo!() : Smarter finder with optimization
-        
+
         let mut i = 1; // will be used to get the current piece's position
 
         for piece in self.squares {
             if piece != Piece::None {
                 // Checks for the same piece type with the same team
-                if piece == piece_with_team  {
+                if piece == piece_with_team {
                     return Some(Position::from_i32(i));
                 }
             }
@@ -94,9 +94,11 @@ impl fmt::Display for Board {
         let (mut x, mut y) = (1, 1);
 
         for square in self.squares {
-            write!(f, "\x1b[1;37m{:?}\x1b[0m \x1b[3m{}{}\x1b[0m | ", 
-                square, 
-                char::from_u32(x + 96).unwrap(), 
+            write!(
+                f,
+                "\x1b[1;37m{:?}\x1b[0m \x1b[3m{}{}\x1b[0m | ",
+                square,
+                char::from_u32(x + 96).unwrap(),
                 y
             )?;
 
@@ -117,14 +119,14 @@ fn board_positions() {
     let chessboard = Board::new();
 
     println!("{}", chessboard);
-    
+
     assert_eq!(
-        chessboard.get_position(Piece::Rook(Team::White)), 
+        chessboard.get_position(Piece::Rook(Team::White)),
         Some(Position::new('a', 1))
     );
 
     assert_eq!(
-        chessboard.get_position(Piece::King(Team::Black)), 
+        chessboard.get_position(Piece::King(Team::Black)),
         Some(Position::new('e', 8))
     );
 }

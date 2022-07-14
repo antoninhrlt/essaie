@@ -11,32 +11,31 @@ use std::char;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Position {
     x: char,
-    y: u32
+    y: u32,
 }
 
 impl Position {
     pub fn new(x: char, y: u32) -> Self {
-        Self {
-            x,
-            y
-        }
+        Self { x, y }
     }
 
-    /// Obtains a structured position from a dumb i32 index (used to walk 
+    /// Obtains a structured position from a dumb i32 index (used to walk
     /// through the board's squares)
     pub fn from_i32(i: u32) -> Self {
         let x_as_i32: u32 = i - 8 * (i / 8) + 96;
 
         Self {
             x: char::from_u32(x_as_i32).unwrap(),
-            y: i / 8 + 1
+            y: i / 8 + 1,
         }
     }
 
     /// Destructure the position into a dumb index (used to walk through the
     /// board's squares)
     pub fn to_index(&self) -> usize {
-        ((self.y - 1) * 8 + (self.x as u32 - 96) - 1).try_into().unwrap()
+        ((self.y - 1) * 8 + (self.x as u32 - 96) - 1)
+            .try_into()
+            .unwrap()
     }
 
     pub fn set_x(&mut self, x: char) -> &mut Self {
@@ -61,12 +60,12 @@ impl Position {
 #[test]
 fn position_from_i32() {
     //   a b c d e f g h
-    // 1 x x x x x x x x => 8    
+    // 1 x x x x x x x x => 8
     // 2 x x x x x x x x => 16
     // 3 x x => 18
     //
     let i: u32 = 18; // so it's {'b', 3}
-    
+
     println!("'a' = {}", 'a' as i32);
     println!("y : {}", i / 8 + 1);
 
@@ -76,16 +75,15 @@ fn position_from_i32() {
 #[test]
 fn position_to_index() {
     let position = Position::new('b', 3);
-    
-    println!(
-        "{:?} = {} + {} (x was '{}' -> {} as u32)", 
-        position, 
-        position.x() as u32 - 96,
-        (position.y() - 1) * 8, 
 
+    println!(
+        "{:?} = {} + {} (x was '{}' -> {} as u32)",
+        position,
+        position.x() as u32 - 96,
+        (position.y() - 1) * 8,
         position.x(),
         position.x() as u32
     );
-    
+
     assert_eq!(position.to_index(), 18 - 1);
 }
