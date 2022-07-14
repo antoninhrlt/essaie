@@ -24,21 +24,58 @@ impl Position {
 
     /// Obtains a structured position from a dumb i32 index (used to walk
     /// through the board's squares)
-    pub fn from_i32(i: u32) -> Self {
+    pub fn from_u32(i: u32) -> Option<Self> {
         let x_as_i32: u32 = i - 8 * (i / 8) + 96;
 
-        Self {
-            x: char::from_u32(x_as_i32).unwrap(),
-            y: i / 8 + 1,
+        let x = char::from_u32(x_as_i32).unwrap();
+        if !('a'..'i').contains(&x) {
+            return None;
         }
+
+        let y = i / 8 + 1;
+        
+        Some(Self {
+            x,
+            y,
+        })
+    }
+
+    pub fn to_u32(&self) -> u32 {
+        ((self.y - 1) * 8 + (self.x as u32 - 96))
+            .try_into()
+            .unwrap()
     }
 
     /// Destructure the position into a dumb index (used to walk through the
     /// board's squares)
     pub fn to_index(&self) -> usize {
-        ((self.y - 1) * 8 + (self.x as u32 - 96) - 1)
+        (self.to_u32() - 1)
             .try_into()
             .unwrap()
+    }
+
+    /// Give a vector of all the positions around this position
+    pub fn positions_around(&self) -> Vec<Position> {
+        let mut around = vec![];
+        
+        let x = self.x as u32;
+
+        for y in self.y - 1..self.y + 2 {
+            for position in vec![
+                Position::new(char::from_u32(x - 1).unwrap(), y), 
+                Position::new(self.x, y),
+                Position::new(char::from_u32(x + 1).unwrap(), y)
+            ] {
+                if ('a'..'i').contains(&position.x()) 
+                    && position.y() > 0 
+                    && position != *self 
+                {
+                    around.push(position)
+                }
+            }
+        }
+
+        around
     }
 
     pub fn set_x(&mut self, x: char) -> &mut Self {
@@ -67,7 +104,7 @@ impl fmt::Display for Position {
 }
 
 #[test]
-fn position_from_i32() {
+fn position_from_u32() {
     //   a b c d e f g h
     // 1 x x x x x x x x => 8
     // 2 x x x x x x x x => 16
@@ -78,7 +115,7 @@ fn position_from_i32() {
     println!("'a' = {}", 'a' as i32);
     println!("y : {}", i / 8 + 1);
 
-    assert_eq!(Position::from_i32(i), Position::new('b', 3));
+    assert_eq!(Position::from_u32(i), Some(Position::new('b', 3)));
 }
 
 #[test]
@@ -95,4 +132,30 @@ fn position_to_index() {
     );
 
     assert_eq!(position.to_index(), 18 - 1);
+}
+
+#[test]
+fn around() {
+    let position = Position::new('b', 3);
+    assert_eq!(position.positions_around(), vec![
+        Position::new('a', 2),
+        Position::new('b', 2),
+        Position::new('c', 2),
+
+        Position::new('a', 3),
+        Position::new('c', 3),
+        
+        Position::new('a', 4),
+        Position::new('b', 4),
+        Position::new('c', 4),
+    ]);
+
+    // Corner position
+    let position = Position::new('a', 1);
+    assert_eq!(position.positions_around(), vec![
+        Position::new('b', 1),
+
+        Position::new('a', 2),
+        Position::new('b', 2),
+    ]);
 }
