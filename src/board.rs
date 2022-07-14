@@ -2,6 +2,8 @@
 // Under the MIT License
 // Copyright (c) 2022 Antonin Hérault
 
+use std::fmt;
+
 use crate::{
     piece::Piece,
     position::Position,
@@ -9,6 +11,11 @@ use crate::{
 };
 
 /// The chessboard filled with piece
+///
+/// Instead of reverting the position each time is needed, the chessboard is 
+/// simply reverted. So, black pieces are at the bottom and white pieces are at
+/// the top. For printing it or displaying on a GUI, remember you have to 
+/// graphically revert it
 pub struct Board {
     squares: [Piece; 64]
 }
@@ -25,9 +32,8 @@ impl Board {
 
     /// Reset the board with the initial positions for every piece.
     pub fn reset(&mut self) {
-        for i in 0..8 {
-
-        }
+        let pawn_position = Position::new('a', 2);
+        self.squares[pawn_position.to_index()] = Piece::Pawn(Team::Black);
     }
 
     /// Positions start from 1, not 0 like an index. So the first position at
@@ -43,12 +49,10 @@ impl Board {
         let mut i = 1; // will be used to get the current piece's position
 
         for piece in self.squares {
-            let position = Position::from_i32(i);
-
             if piece != Piece::None {
                 // Checks for the same piece type with the same team
                 if piece == piece_with_team  {
-                    return Some(position);
+                    return Some(Position::from_i32(i).unwrap());
                 }
             }
 
@@ -61,17 +65,39 @@ impl Board {
     // todo!() : Display the board on a GUI
 }
 
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let (mut x, mut y) = (1, 1);
+        write!(f, "{}", y)?;
+
+        for square in self.squares {
+            write!(f, " | {:?}\t", square)?;
+
+            if x == 8 && y != 8 {
+                y += 1;
+                write!(f, "\n{}", y)?;
+                x = 0;
+            }
+            x += 1;
+        }
+
+        Ok(())
+    }
+}
+
 #[test]
 fn board_positions() {
     let chessboard = Board::new();
-    
-    assert_eq!(
-        chessboard.get_position(Piece::King(Team::Black)), 
-        Some(Position::new('e', 8))
-    );
 
-    assert_eq!(
-        chessboard.get_position(Piece::Queen(Team::White)), 
-        Some(Position::new('d', 1))
-    );
+    println!("{}", chessboard);
+    
+    // assert_eq!(
+    //     chessboard.get_position(Piece::King(Team::Black)), 
+    //     Some(Position::new('e', 8))
+    // );
+
+    // assert_eq!(
+    //     chessboard.get_position(Piece::Queen(Team::White)), 
+    //     Some(Position::new('d', 1))
+    // );
 }
