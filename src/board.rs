@@ -33,7 +33,7 @@ impl Board {
     /// Reset the board with the initial positions for every piece.
     pub fn reset(&mut self) {
         let pawn_position = Position::new('a', 2);
-        self.squares[pawn_position.to_index()] = Piece::Pawn(Team::Black);
+        self.squares[pawn_position.to_index()] = Piece::Pawn(Team::White);
     }
 
     /// Positions start from 1, not 0 like an index. So the first position at
@@ -52,7 +52,7 @@ impl Board {
             if piece != Piece::None {
                 // Checks for the same piece type with the same team
                 if piece == piece_with_team  {
-                    return Some(Position::from_i32(i).unwrap());
+                    return Some(Position::from_i32(i));
                 }
             }
 
@@ -90,14 +90,14 @@ fn board_positions() {
     let chessboard = Board::new();
 
     println!("{}", chessboard);
-    
-    // assert_eq!(
-    //     chessboard.get_position(Piece::King(Team::Black)), 
-    //     Some(Position::new('e', 8))
-    // );
 
-    // assert_eq!(
-    //     chessboard.get_position(Piece::Queen(Team::White)), 
-    //     Some(Position::new('d', 1))
-    // );
+    assert_eq!(
+        chessboard.get_position(Piece::King(Team::Black)), 
+        Some(Position::new('e', 8))
+    );
+
+    assert_eq!(
+        chessboard.get_position(Piece::Queen(Team::White)), 
+        Some(Position::new('d', 1))
+    );
 }

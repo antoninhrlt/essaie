@@ -24,19 +24,13 @@ impl Position {
 
     /// Obtains a structured position from a dumb i32 index (used to walk 
     /// through the board's squares)
-    pub fn from_i32(i: u32) -> Option<Self> {
+    pub fn from_i32(i: u32) -> Self {
         let x_as_i32: u32 = i - 8 * (i / 8) + 97;
 
-        if x_as_i32 < 0 {
-            return None;
+        Self {
+            x: char::from_u32(x_as_i32).unwrap(),
+            y: i / 8 + 1
         }
-
-        Some(
-            Self {
-                x: char::from_u32(x_as_i32).unwrap(),
-                y: i / 8 + 1
-            }
-        )
     }
 
     /// Destructure the position into a dumb index (used to walk through the
@@ -76,7 +70,7 @@ fn position_from_i32() {
     println!("'a' = {}", 'a' as i32);
     println!("y : {}", i / 8 + 1);
 
-    assert_eq!(Position::from_i32(i), Some(Position::new('c', 3)));
+    assert_eq!(Position::from_i32(i), Position::new('c', 3));
 }
 
 #[test]
