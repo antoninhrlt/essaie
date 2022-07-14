@@ -3,6 +3,7 @@
 // Copyright (c) 2022 Antonin Hérault
 
 pub mod board;
+pub mod journal;
 pub mod piece;
 pub mod position;
 pub mod team;

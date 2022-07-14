@@ -2,7 +2,10 @@
 // Under the MIT License
 // Copyright (c) 2022 Antonin Hérault
 
-use std::char;
+use std::{
+    char,
+    fmt,
+};
 
 /// Basically it permits to structure what is really a position on a board
 ///
@@ -54,6 +57,12 @@ impl Position {
 
     pub fn y(&self) -> u32 {
         self.y
+    }
+}
+
+impl fmt::Display for Position {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}{}", self.x(), self.y())
     }
 }
 
