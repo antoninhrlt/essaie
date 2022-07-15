@@ -67,15 +67,15 @@ impl Board {
     ///
     /// Returns an error when the `from_position` is a `Piece::None` piece
     pub fn move_piece(&mut self, from_position: Position, to_position: Position) -> Result<(), &'static str> {
-        let piece = self.get_piece(from_position.clone());
+        let piece = self.get_piece(&from_position);
 
         if piece == Piece::None {
-            return Err("Try to move a `None` piece");
+            return Err("try to move a `None` piece");
         }
         
         // Captures the piece when not `None`
         {
-            let to_piece = self.get_piece(to_position.clone());
+            let to_piece = self.get_piece(&to_position);
             if to_piece != Piece::None {
                 self.captured_pieces.push(to_piece);
             }
@@ -88,7 +88,7 @@ impl Board {
     }
 
     /// Finds the piece at `position` and returns it
-    pub fn get_piece(&self, position: Position) -> Piece {
+    pub fn get_piece(&self, position: &Position) -> Piece {
         self.squares[position.to_index()]
     }
 
@@ -108,7 +108,7 @@ impl Board {
             if piece != Piece::None {
                 // Checks for the same piece type with the same team
                 if piece == piece_with_team {
-                    return Some(Position::from_i32(i));
+                    return Some(Position::from_u32(i).unwrap());
                 }
             }
 
@@ -150,6 +150,54 @@ impl fmt::Display for Board {
     }
 }
 
+/// All move check functions 
+impl Board {
+    pub fn check_piece_move(&self, from_position: Position, to_position: Position) -> Result<(), &'static str> {
+        let piece: Piece = self.get_piece(&from_position);
+
+        match piece {
+            Piece::King(team) => {
+                self.check_blocked(&piece, &from_position)?;
+                Ok(())
+            },
+            Piece::Queen(team) => {
+                self.check_blocked(&piece, &from_position)?;
+                Ok(())
+            },
+            Piece::Rook(team) => {
+                self.check_blocked(&piece, &from_position)?;
+                Ok(())
+            },
+            Piece::Bishop(team) => {
+                self.check_blocked(&piece, &from_position)?;
+                Ok(())
+            },
+            Piece::Knight(team) => {
+                Ok(())
+            },
+            Piece::Pawn(team) => {
+                self.check_blocked(&piece, &from_position)?;
+                Ok(())
+            },
+            Piece::None => {
+                Err("try to move a `None` piece")
+            }
+        }
+    }
+
+    /// A piece is blocked when it cannot move in any direction
+    fn check_blocked(&self, piece: &Piece, piece_position: &Position) -> Result<(), &'static str> {
+        for position in piece_position.positions_around() {
+            println!("piece {:?} at {:?}", self.get_piece(&position), position);
+
+            if self.get_piece(&position) != Piece::None {
+                return Err("the piece is blocked, all squares around are occupied");
+            }
+        }
+        Ok(())
+    }
+}
+
 #[test]
 fn board_positions() {
     let chessboard = Board::new();
@@ -171,6 +219,11 @@ fn board_positions() {
 fn move_pieces() {
     let mut chessboard = Board::new();
     println!("1:\n{}", chessboard);
+
+    match chessboard.check_piece_move(Position::new('c', 1), Position::new('b', 2)) {
+        Err(message) => panic!("{}", message),
+        Ok(()) => {}
+    }
 
     chessboard.move_piece(Position::new('b', 2), Position::new('b', 3));
     println!("2:\n{}", chessboard);
