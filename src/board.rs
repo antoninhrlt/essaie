@@ -152,6 +152,10 @@ impl fmt::Display for Board {
 
 /// All move check functions 
 impl Board {
+    /// Does all the check possible according to the moving piece
+    ///
+    /// For example, it does not check if the piece is "blocked" for the knight
+    /// because the knight can move over the other pieces 
     pub fn check_piece_move(&self, from_position: Position, to_position: Position) -> Result<(), &'static str> {
         let piece: Piece = self.get_piece(&from_position);
 
@@ -170,6 +174,7 @@ impl Board {
             },
             Piece::Bishop(team) => {
                 self.check_blocked(&piece, &from_position)?;
+                self.check_diagonal_move(&from_position, &to_position)?;
                 Ok(())
             },
             Piece::Knight(team) => {
@@ -188,12 +193,21 @@ impl Board {
     /// A piece is blocked when it cannot move in any direction
     fn check_blocked(&self, piece: &Piece, piece_position: &Position) -> Result<(), &'static str> {
         for position in piece_position.positions_around() {
-            println!("piece {:?} at {:?}", self.get_piece(&position), position);
-
             if self.get_piece(&position) != Piece::None {
                 return Err("the piece is blocked, all squares around are occupied");
             }
         }
+        Ok(())
+    }
+
+    /// Check for bishop pieces
+    ///
+    /// Checks if the movement is made in a diagonal way. If is not, it returns
+    /// an error
+    ///
+    /// There are no pieces that can do a diagonal move by passing over the other
+    /// pieces, so it also checks for blocked on the wanted path
+    fn check_diagonal_move(&self, from_position: &Position, to_position: &Position) -> Result<(), &'static str> {
         Ok(())
     }
 }
@@ -220,11 +234,13 @@ fn move_pieces() {
     let mut chessboard = Board::new();
     println!("1:\n{}", chessboard);
 
+
+    chessboard.move_piece(Position::new('b', 2), Position::new('b', 3));
+
     match chessboard.check_piece_move(Position::new('c', 1), Position::new('b', 2)) {
-        Err(message) => panic!("{}", message),
+        Err(message) => println!("{}", message),
         Ok(()) => {}
     }
 
-    chessboard.move_piece(Position::new('b', 2), Position::new('b', 3));
     println!("2:\n{}", chessboard);
 }
